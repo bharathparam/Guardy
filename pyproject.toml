@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guardy"
+version = "1.0.0"
+description = "Secure File Storage Middleware that acts statelessly on file byte streams."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Guard-D", email = "author@example.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "python-multipart>=0.0.6",
+    "python-magic>=0.4.27",
+    "scikit-learn>=1.3.0",
+    "cryptography>=41.0.0",
+    "pydantic>=2.0.0",
+    "numpy>=1.24.0",
+    "jinja2>=3.1.2",
+    "torch>=2.0.0",
+    "tqdm>=4.65.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/example/secure_file_guard"
+
+[tool.setuptools.packages.find]
+include = ["secure_file_guard", "secure_file_guard.*"]
+
+[tool.setuptools.package-data]
+"guardy.ui" = ["templates/*", "static/*"]
+"guardy.models" = ["*.pth", "*.pt", "*.pkl"]

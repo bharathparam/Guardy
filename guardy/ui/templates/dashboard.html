@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guard-D Security Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white p-8 font-sans">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-blue-400 mb-6">File Security Dashboard</h1>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-blue-500">
+                <p class="text-gray-400 text-sm">Total Uploads</p>
+                <p class="text-3xl font-bold">{{ stats.get('total_uploads', 0) }}</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-green-500">
+                <p class="text-gray-400 text-sm">Safe Files</p>
+                <p class="text-3xl font-bold text-green-400">{{ stats.get('safe_uploads', 0) }}</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-red-500">
+                <p class="text-gray-400 text-sm">Blocked Files</p>
+                <p class="text-3xl font-bold text-red-500">{{ stats.get('blocked_uploads', 0) }}</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-yellow-500">
+                <p class="text-gray-400 text-sm">Quarantined</p>
+                <p class="text-3xl font-bold text-yellow-400">{{ stats.get('quarantined', 0) }}</p>
+            </div>
+        </div>
+
+        <!-- Recent Alerts -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Recent Security Alerts</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-gray-400 border-b border-gray-700">
+                            <th class="py-3 px-4">Time</th>
+                            <th class="py-3 px-4">File Name</th>
+                            <th class="py-3 px-4">User ID</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Reason</th>
+                            <th class="py-3 px-4">Risk Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts %}
+                        <tr class="border-b border-gray-700 hover:bg-gray-750">
+                            <td class="py-3 px-4 text-sm">{{ alert.get('timestamp', 'N/A') }}</td>
+                            <td class="py-3 px-4 text-sm font-mono text-blue-300">{{ alert.get('original_filename',
+                                alert.get('filename', 'Unknown')) }}</td>
+                            <td class="py-3 px-4 text-sm">
+                                <a href="/security-dashboard/user/{{ alert.get('user_id', 'Anon') }}"
+                                    class="text-blue-400 hover:text-blue-300 underline font-semibold">{{
+                                    alert.get('user_id', 'Anon') }}</a>
+                            </td>
+                            <td class="py-3 px-4">
+                                {% if alert.get('is_safe', True) %}
+                                <span class="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">SAFE</span>
+                                {% else %}
+                                <span class="px-2 py-1 bg-red-900 text-red-300 rounded text-xs">BLOCKED</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-400">
+                                {% for reason in alert.get('reasons', []) %}
+                                <p>- {{ reason }}</p>
+                                {% endfor %}
+                            </td>
+                            <td class="py-3 px-4 text-sm">
+                                {{ alert.get('risk_score', 0.0) }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="py-6 text-center text-gray-500 italic">No recent alerts recorded.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+# ml_engine – Python dependencies
+# Install with:  pip install -r requirements.txt
+
+# ── Core ML ────────────────────────────────────────────────────────────────
+torch>=2.1.0                  # ByteCNN (CPU/GPU)
+torchvision>=0.16.0           # optional; used if image datasets are processed
+scikit-learn>=1.3.0           # IsolationForest, StandardScaler, Pipeline
+
+# ── Numerical & Scientific ─────────────────────────────────────────────────
+numpy>=1.24.0
+
+# ── Progress bars & CLI ────────────────────────────────────────────────────
+tqdm>=4.66.0
+
+# ── HTTP downloads ─────────────────────────────────────────────────────────
+requests>=2.31.0
+
+# ── Optional: GPU / CUDA acceleration ─────────────────────────────────────
+# Uncomment the appropriate line for your CUDA version:
+# --index-url https://download.pytorch.org/whl/cu118
+# torch==2.1.0+cu118
+
+# ── Optional: Jupyter / notebook support ───────────────────────────────────
+# jupyter>=1.0.0
+# matplotlib>=3.7.0
+# seaborn>=0.12.0

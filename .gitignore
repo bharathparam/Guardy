@@ -1,0 +1,36 @@
+# Environments
+venv/
+env/
+.env
+
+# MacOS
+.DS_Store
+
+# PyTest
+.pytest_cache/
+
+# Python caches and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build directories
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing logs
+trained_models/*.log
+
+# User Data (if local testing occurred)
+storage/safe/*
+storage/quarantine/*
+!storage/safe/.gitkeep
+!storage/quarantine/.gitkeep
