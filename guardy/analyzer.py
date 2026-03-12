@@ -121,7 +121,7 @@ class FileAnalyzer:
                     "anomaly_score": ml_result.get("anomaly_score"),
                     "final_risk": ml_result.get("final_risk")
                 }
-                if ml_result.get("final_risk", 0) > 0.5:
+                if ml_result.get("final_risk", 0) > self.config.max_ai_anomaly_score:
                     risk_score += self.config.weight_pytorch_anomaly
                     reasons.append(f"AI Behavior Anomaly: PyTorch dual-model engine flagged file as malicious (Score: {ml_result['final_risk']})")
 
