@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "guardy"
-version = "1.0.0"
+version = "2.0.0"
 description = "Secure File Storage Middleware with integrated modern web dashboard for real-time security monitoring"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -35,7 +35,7 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/example/secure_file_guard"
+"Homepage" = "https://github.com/bharathparam/guardy-2.0"
 
 [tool.setuptools.packages.find]
 include = ["guardy", "guardy.*"]
