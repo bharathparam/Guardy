@@ -202,85 +202,141 @@
         <!-- User Logs History -->
         <div class="glass-panel rounded-2xl p-6 md:p-8 animate-slide-up border border-glassBorder"
             style="animation-delay: 0.2s; animation-fill-mode: both;">
-            <h2 class="text-xl font-bold tracking-wide mb-6 text-gray-200">Transmission History</h2>
-            <div class="overflow-x-auto rounded-xl border border-glassBorder">
-                <table class="w-full text-left whitespace-nowrap">
-                    <thead class="bg-black bg-opacity-40">
-                        <tr class="text-xs tracking-widest uppercase text-gray-500 border-b border-glassBorder">
-                            <th class="py-4 px-6">Transmission Time</th>
-                            <th class="py-4 px-6">Payload Imprint</th>
-                            <th class="py-4 px-6">AI Assessment</th>
-                            <th class="py-4 px-6">Trace Logs</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-glassBorder">
-                        {% for log in logs %}
-                        <tr class="hover:bg-white hover:bg-opacity-5 transition-colors duration-150">
-                            <td class="py-4 px-6 text-sm text-gray-400 font-mono">{{ log.get('timestamp',
-                                'N/A')[:19].replace('T', ' ') }}</td>
+            <h2 class="text-xl font-bold tracking-wide mb-6 text-gray-200 flex items-center">
+                <svg class="w-6 h-6 mr-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                    </path>
+                </svg>
+                Transmission History & File Signatures
+            </h2>
 
-                            <td class="py-4 px-6">
-                                <p class="text-sm font-bold text-white mb-1">{{ log.get('original_filename',
+            <div class="space-y-4">
+                {% for log in logs %}
+                {% set score = log.get('risk_score', 0.0) %}
+                {% set pct = (score * 100) | round | int %}
+                <div
+                    class="rounded-xl border {% if log.get('is_safe', True) %}border-glassBorder{% else %}border-danger border-opacity-30{% endif %} bg-black bg-opacity-20 overflow-hidden">
+
+                    <!-- File Header Row -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between px-5 py-4 {% if not log.get('is_safe', True) %}bg-danger bg-opacity-5{% endif %}">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 {% if log.get('is_safe', True) %}bg-safe bg-opacity-10 border border-safe border-opacity-20{% else %}bg-danger bg-opacity-10 border border-danger border-opacity-20{% endif %}">
+                                <svg class="w-5 h-5 {% if log.get('is_safe', True) %}text-safe{% else %}text-danger{% endif %}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-white text-sm">{{ log.get('original_filename',
                                     log.get('filename', 'Unknown')) }}</p>
-                                <p class="text-xs text-gray-500 font-mono">{{ log.get('detected_mime', 'unknown') }} •
-                                    {{ log.get('size', 0) }}B</p>
-                                <p class="text-[10px] text-gray-600 font-mono mt-1 opacity-50"
-                                    title="{{ log.get('sha256_hash', '') }}">{{ log.get('sha256_hash', 'N/A')[:16] }}...
-                                </p>
-                            </td>
+                                <p class="text-xs text-gray-500 font-mono mt-0.5">{{ log.get('timestamp',
+                                    'N/A')[:19].replace('T', ' ') }} UTC</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 md:mt-0 flex items-center gap-4">
+                            <!-- Risk Score Bar -->
+                            <div class="flex items-center gap-2">
+                                <div class="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                                    <div class="h-full {% if score > 0.7 %}bg-danger{% elif score > 0.4 %}bg-warning{% else %}bg-safe{% endif %} rounded-full"
+                                        style="width: {{ pct }}%"></div>
+                                </div>
+                                <span
+                                    class="font-mono text-xs {% if score > 0.7 %}text-danger{% elif score > 0.4 %}text-warning{% else %}text-safe{% endif %}">{{
+                                    "%.2f"|format(score) }}</span>
+                            </div>
+                            <!-- Status Badge -->
+                            {% if log.get('is_safe', True) %}
+                            <span
+                                class="px-3 py-1 bg-safe bg-opacity-10 text-safe border border-safe border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase">SAFE</span>
+                            {% else %}
+                            <span
+                                class="px-3 py-1 bg-danger bg-opacity-10 text-danger border border-danger border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase">BLOCKED</span>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                            <td class="py-4 px-6">
-                                <div class="mb-2">
-                                    {% if log.get('is_safe', True) %}
-                                    <span
-                                        class="px-3 py-1 bg-safe bg-opacity-10 text-safe border border-safe border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(0,230,118,0.2)]">SAFE</span>
-                                    {% else %}
-                                    <span
-                                        class="px-3 py-1 bg-danger bg-opacity-10 text-danger border border-danger border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(255,42,95,0.2)]">
-                                        BLOCKED ({{ "%.2f"|format(log.get('risk_score', 0.0)) }})
-                                    </span>
-                                    {% endif %}
-                                </div>
-                                <div class="text-[10px] text-gray-500 font-mono mt-2 space-y-0.5">
-                                    <p>Heuristic Entropy: <span class="text-gray-300">{{
-                                            "%.2f"|format(log.get('entropy', 0.0)) }}</span></p>
+                    <!-- Signature Details Grid -->
+                    <div
+                        class="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-glassBorder divide-x divide-glassBorder">
+                        <div class="p-4">
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Detected MIME</p>
+                            <p class="text-xs font-mono text-brand break-all">{{ log.get('detected_mime', 'unknown') }}
+                            </p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">File Size</p>
+                            <p class="text-xs font-mono text-white">{{ "{:,}".format(log.get('size', 0)) }} bytes</p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Byte Entropy</p>
+                            <p
+                                class="text-xs font-mono {% if log.get('entropy', 0) > 7.5 %}text-warning{% else %}text-safe{% endif %}">
+                                {{ "%.4f"|format(log.get('entropy', 0.0)) }}
+                            </p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">AI Telemetry</p>
+                            {% if log.get('ai_telemetry') %}
+                            <p class="text-xs font-mono text-gray-300">CNN: <span class="text-brand">{{
+                                    "%.3f"|format(log.ai_telemetry.get('cnn_score', 0)) }}</span></p>
+                            <p class="text-xs font-mono text-gray-300">Iso: <span class="text-brand">{{
+                                    "%.3f"|format(log.ai_telemetry.get('anomaly_score', 0)) }}</span></p>
+                            {% else %}
+                            <p class="text-xs font-mono text-gray-600">Stage 2 not triggered</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                                    {% if log.get('ai_telemetry') %}
-                                    <p title="PyTorch Output">Net.ByteCNN: <span class="text-brand text-glow">{{
-                                            "%.3f"|format(log.ai_telemetry.get('cnn_score', 0)) }}</span></p>
-                                    <p title="Sci-Kit Output">Net.Anomaly: <span class="text-brand text-glow">{{
-                                            "%.3f"|format(log.ai_telemetry.get('anomaly_score', 0)) }}</span></p>
-                                    {% endif %}
-                                </div>
-                            </td>
+                    <!-- SHA-256 Signature Row -->
+                    <div class="px-5 py-3 border-t border-glassBorder bg-black bg-opacity-30 flex items-center gap-3 group cursor-pointer"
+                        onclick="navigator.clipboard.writeText('{{ log.get('sha256_hash', '') }}').then(() => this.querySelector('.copy-label').textContent = 'Copied!')"
+                        title="Click to copy SHA-256">
+                        <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                            </path>
+                        </svg>
+                        <p
+                            class="font-mono text-[11px] text-gray-500 group-hover:text-brand transition-colors break-all flex-1">
+                            {{ log.get('sha256_hash', 'N/A') }}</p>
+                        <span
+                            class="copy-label text-[10px] text-gray-600 group-hover:text-brand transition-colors tracking-widest uppercase flex-shrink-0">Click
+                            to copy</span>
+                    </div>
 
-                            <td class="py-4 px-6">
-                                <div class="text-xs space-y-1">
-                                    {% for reason in log.get('reasons', []) %}
-                                    <p class="text-gray-400"><span class="text-brand mr-1">►</span> {{ reason }}</p>
-                                    {% else %}
-                                    <p class="text-gray-600 font-mono uppercase tracking-widest opacity-50">Payload
-                                        pristine</p>
-                                    {% endfor %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="py-12 text-center text-gray-500">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <p class="font-mono tracking-widest uppercase text-sm">Subject database empty.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                    <!-- Block Reasons (only if blocked) -->
+                    {% if not log.get('is_safe', True) and log.get('reasons') %}
+                    <div class="px-5 py-3 border-t border-danger border-opacity-20 bg-danger bg-opacity-5">
+                        <p class="text-[10px] text-danger uppercase tracking-widest mb-2 font-bold">Threat Indicators
+                            Detected</p>
+                        <div class="space-y-1">
+                            {% for reason in log.get('reasons', []) %}
+                            <p class="text-xs text-gray-400 flex items-start gap-2">
+                                <span class="text-danger mt-0.5 flex-shrink-0">►</span>
+                                {{ reason }}
+                            </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="py-12 text-center text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-mono tracking-widest uppercase text-sm">Subject database empty.</p>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>

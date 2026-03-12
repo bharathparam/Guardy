@@ -113,31 +113,100 @@ async def fetch_user_logs(user_id: str):
 
 async def generate_llm_report(user_id: str):
     """
-    Callback for the dashboard to generate an LLM report.
-    In a real system, you would call OpenAI, Anthropic, or an open-source model here.
+    Callback for the dashboard to generate a rich, data-driven security report
+    with all file signatures, AI telemetry, entropy scores, and risk assessments.
     """
     import asyncio
-    # Simulate LLM Network latency
-    await asyncio.sleep(2)
-    
+    await asyncio.sleep(1)  # Simulate LLM latency
+
     logs = await fetch_user_logs(user_id)
     total_logs = len(logs)
     blocked_logs = sum(1 for log in logs if not log.get("is_safe", True))
-    
-    # Mock LLM Output
+    safe_logs = total_logs - blocked_logs
+    avg_risk = (sum(log.get("risk_score", 0.0) for log in logs) / total_logs) if total_logs > 0 else 0.0
+    risk_level = "🔴 CRITICAL" if avg_risk > 0.7 else ("🟡 ELEVATED" if avg_risk > 0.4 else "🟢 NOMINAL")
+
+    # Build the per-file signature table
+    file_signatures_md = ""
+    for i, log in enumerate(logs[:15], 1):  # Cap at 15 most recent
+        fname   = log.get("original_filename", "unknown")
+        sha256  = log.get("sha256_hash", "N/A")
+        mime    = log.get("detected_mime", "unknown")
+        size    = log.get("size", 0)
+        entropy = log.get("entropy", 0.0)
+        risk    = log.get("risk_score", 0.0)
+        status  = "✅ SAFE" if log.get("is_safe", True) else "❌ BLOCKED"
+        ts      = log.get("timestamp", "N/A")[:19].replace("T", " ")
+
+        # AI telemetry
+        telem = log.get("ai_telemetry") or {}
+        cnn_score     = f"{telem.get('cnn_score', 'N/A'):.4f}" if isinstance(telem.get("cnn_score"), float) else "—"
+        anomaly_score = f"{telem.get('anomaly_score', 'N/A'):.4f}" if isinstance(telem.get("anomaly_score"), float) else "—"
+
+        # Reasons for blocked files
+        reasons_md = ""
+        reasons = log.get("reasons") or []
+        if reasons:
+            reasons_md = "\n".join(f"  - *{r}*" for r in reasons)
+
+        file_signatures_md += f"""
+---
+
+#### `[{i}]` {fname}
+
+| Property         | Value |
+|------------------|-------|
+| **Timestamp**    | `{ts}` |
+| **Status**       | {status} |
+| **Risk Score**   | `{risk:.3f}` |
+| **Detected MIME**| `{mime}` |
+| **File Size**    | `{size:,} bytes` |
+| **Byte Entropy** | `{entropy:.4f}` |
+| **SHA-256**      | `{sha256}` |
+| **CNN Score**    | `{cnn_score}` |
+| **Anomaly Score**| `{anomaly_score}` |
+{"**Block Reasons** |" if reasons_md else ""}
+{reasons_md}
+"""
+
     markdown = f"""
-### 🛡️ Analyst Report for `{user_id}`
+## 🛡️ Guardy Security Analyst Report
+**Subject ID:** `{user_id}`
+**Generated:** `{__import__('datetime').datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC`
 
-Based on the chronological analysis of **{total_logs}** records, the AI Threat Engine provides the following findings:
+---
 
-- **Incident Summary:** `{user_id}` has initiated **{total_logs}** total uploads, of which **{blocked_logs}** were successfully isolated and quarantined.
-- **Pattern Tracking:** 
-  - The behavior profile of this subject often violates Entropy standards for raw file structure.
-  - The payload vectors frequently indicate spoofed MIME headers vs the actual underlying byte structure.
+### 📊 Activity Summary
 
-**LLM Recommendation:** 
-> _"Immediately restrict POST permissions across the gateway API for `{user_id}` until a manual code review of the payload at `{QUARANTINE_DIR}` is completed."_
-    """
+| Metric | Value |
+|--------|-------|
+| **Total Transmissions** | `{total_logs}` |
+| **Safe Payloads**       | `{safe_logs}` |
+| **Blocked Payloads**    | `{blocked_logs}` |
+| **Avg. Risk Score**     | `{avg_risk:.3f}` |
+| **Threat Level**        | {risk_level} |
+
+---
+
+### 🔍 File Signature Intelligence
+
+The following records are derived from the 5-Layer Deep Inspection Engine:
+{file_signatures_md if file_signatures_md else "_No transmission records found for this subject._"}
+
+---
+
+### 🤖 AI Engine Assessment
+
+- **ByteCNN Model:** Evaluated raw byte tensor arrays against known malware class distributions.
+- **IsolationForest Anomaly:** Flagged behavioral statistical deviations from the user's historical upload baseline.
+{"- **Verdict:** This subject has a history of transmissions flagged by deep inspection layers. Recommend manual review." if blocked_logs > 0 else "- **Verdict:** No significant anomalies detected in this subject's transmission history. Profile appears nominal."}
+
+---
+
+### 📋 Recommendation
+
+{"> ⚠️ **Restrict** upload permissions for `" + user_id + "` pending manual payload review in quarantine directory." if blocked_logs > 2 else "> ✅ **No immediate action required.** Continue passive monitoring of `" + user_id + "`'s transmission patterns."}
+"""
     return markdown
 
 # --- 3. MOUNT THE DASHBOARD ---
