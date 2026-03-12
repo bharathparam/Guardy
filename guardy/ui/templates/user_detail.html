@@ -450,7 +450,7 @@
             `;
 
             try {
-                const response = await fetch(`/security-dashboard/generate-report/${userId}`, {
+                const response = await fetch(`/generate-report/${userId}`, {
                     method: 'POST'
                 });
                 const data = await response.json();
