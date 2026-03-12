@@ -41,10 +41,10 @@ ENCRYPTION_KEY = Fernet.generate_key()
 
 # Construct a custom configuration to showcase the library's flexibility
 custom_config = GuardConfig(
-    max_safe_entropy=7.5,           # Stricter entropy requirement
-    max_zip_compression_ratio=50.0, # Reject archive bombs expanding more than 50x
-    weight_mime_spoofing=0.4,       # Higher penalty for spoofed extensions
-    rejection_risk_threshold=0.45   # Reject anything at or above 0.45 (Stricter than default 0.5)
+    max_safe_entropy=7.8,           # Relaxed entropy requirement for general files
+    max_zip_compression_ratio=100.0, # Reject archive bombs expanding more than 100x
+    weight_mime_spoofing=0.2,       # Standard penalty for spoofed extensions
+    rejection_risk_threshold=0.60   # Relaxed threshold to reduce false-positives
 )
 
 # Instantiate the Stateless analyzer from our library
@@ -149,6 +149,16 @@ dashboard_router = get_dashboard_router(
     generate_llm_report=generate_llm_report
 )
 app.include_router(dashboard_router)
+
+# Enable CORS for frontend development
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # --- 4. CREATE THE UPLOAD ENDPOINT ---
@@ -270,4 +280,4 @@ async def get_user_report(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
