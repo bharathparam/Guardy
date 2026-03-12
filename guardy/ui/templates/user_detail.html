@@ -4,132 +4,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Detail: {{ user_id }} - Guard-D</title>
+    <title>Subject Analysis: {{ user_id }} - Guardy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: '#0f1115',
+                        glass: 'rgba(255, 255, 255, 0.03)',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                        brand: '#00f0ff',
+                        danger: '#ff2a5f',
+                        safe: '#00e676',
+                        warning: '#ffc400'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at 50% 0%, #1a1d24 0%, #0f1115 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(20, 24, 32, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .ai-generate {
+            background: linear-gradient(90deg, #00f0ff, #3b82f6);
+            background-size: 200% 100%;
+            animation: gradient-x 3s ease infinite;
+        }
+
+        @keyframes gradient-x {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .prose-custom p,
+        .prose-custom ul,
+        .prose-custom h3 {
+            color: #d1d5db;
+            /* Tailwind gray-300 */
+        }
+
+        .prose-custom h3 {
+            color: #00f0ff;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .prose-custom strong {
+            color: #fff;
+        }
+
+        .prose-custom ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .prose-custom li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .prose-custom li::before {
+            content: "►";
+            position: absolute;
+            left: 0;
+            color: #00f0ff;
+            font-size: 0.8em;
+            top: 0.2em;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-900 text-white p-8 font-sans">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
+<body class="text-white p-4 md:p-8">
+    <div class="max-w-7xl mx-auto animate-fade-in">
+
+        <!-- Header -->
+        <header
+            class="mb-12 flex flex-col md:flex-row md:items-end justify-between border-b border-glassBorder pb-6 animate-slide-up">
             <div>
-                <a href="/security-dashboard/" class="text-gray-400 hover:text-white mb-2 inline-block">&larr; Back to
-                    Dashboard</a>
-                <h1 class="text-3xl font-bold text-blue-400">User Profile: <span class="text-white">{{ user_id }}</span>
+                <a href="/security-dashboard/"
+                    class="text-gray-500 hover:text-brand mb-4 inline-flex items-center text-sm font-mono tracking-widest uppercase transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Command Center
+                </a>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+                    Subject Profile
                 </h1>
+                <p class="mt-2 text-2xl font-mono text-brand text-glow uppercase tracking-widest break-all">
+                    {{ user_id }}
+                </p>
             </div>
 
             <button id="generateBtn" onclick="generateReport()"
-                class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded shadow-lg transition duration-200 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                class="mt-6 md:mt-0 ai-generate text-black font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] transition hover:scale-105 flex items-center justify-center tracking-wide">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
                     </path>
                 </svg>
-                Generate LLM Security Report
+                EXECUTE AI ANALYSIS
             </button>
-        </div>
+        </header>
 
         <!-- LLM Report Container -->
-        <div id="reportContainer" class="hidden mb-8 bg-gray-800 rounded-lg shadow-lg border border-blue-500 p-6">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                <h2 class="text-xl font-bold text-blue-300 flex items-center">
-                    <svg class="w-6 h-6 mr-2 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    AI Generated Analyst Report
-                </h2>
-                <button onclick="closeReport()" class="text-gray-400 hover:text-white">&times;</button>
+        <div id="reportContainer"
+            class="hidden mb-12 glass-panel rounded-2xl border border-brand p-8 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-32 h-32 bg-brand opacity-10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
             </div>
-            <!-- Dynamic Markdown loads here -->
-            <div id="reportContent" class="prose prose-invert max-w-none prose-blue">
-                <div class="flex items-center text-gray-400 italic">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg"
-                        fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+
+            <div class="flex justify-between items-center mb-6 border-b border-glassBorder pb-4">
+                <h2 class="text-xl font-mono font-bold text-white flex items-center tracking-widest uppercase">
+                    <svg class="w-6 h-6 mr-3 text-brand animate-spin-slow" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5">
                         </path>
                     </svg>
-                    Analyzing user history and crafting report...
-                </div>
+                    Neural Analyst Report
+                </h2>
+                <button onclick="closeReport()" class="text-gray-500 hover:text-danger transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="reportContent" class="prose-custom font-sans max-w-none text-sm md:text-base leading-relaxed">
+                <!-- Fallback content injected via JS -->
             </div>
         </div>
 
-        <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Risk Score Timeline</h2>
-            <div class="relative h-64 w-full">
+        <!-- Chart -->
+        <div class="glass-panel rounded-2xl p-6 md:p-8 mb-12 animate-slide-up border border-glassBorder"
+            style="animation-delay: 0.1s; animation-fill-mode: both;">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold tracking-wide text-gray-200">Behavioral Risk Horizon</h2>
+            </div>
+            <div class="relative h-72 w-full">
                 <canvas id="riskChart"></canvas>
             </div>
         </div>
 
         <!-- User Logs History -->
-        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Historical Upload Logs</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="text-gray-400 border-b border-gray-700">
-                            <th class="py-3 px-4">Time</th>
-                            <th class="py-3 px-4">Detected File</th>
-                            <th class="py-3 px-4">Sizes / Hashes</th>
-                            <th class="py-3 px-4">Status & Entropy</th>
-                            <th class="py-3 px-4">Findings</th>
+        <div class="glass-panel rounded-2xl p-6 md:p-8 animate-slide-up border border-glassBorder"
+            style="animation-delay: 0.2s; animation-fill-mode: both;">
+            <h2 class="text-xl font-bold tracking-wide mb-6 text-gray-200">Transmission History</h2>
+            <div class="overflow-x-auto rounded-xl border border-glassBorder">
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead class="bg-black bg-opacity-40">
+                        <tr class="text-xs tracking-widest uppercase text-gray-500 border-b border-glassBorder">
+                            <th class="py-4 px-6">Transmission Time</th>
+                            <th class="py-4 px-6">Payload Imprint</th>
+                            <th class="py-4 px-6">AI Assessment</th>
+                            <th class="py-4 px-6">Trace Logs</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-glassBorder">
                         {% for log in logs %}
-                        <tr class="border-b border-gray-700 hover:bg-gray-750">
-                            <td class="py-3 px-4 text-sm">{{ log.get('timestamp', 'N/A') }}</td>
-                            <td class="py-3 px-4 text-sm">
-                                <p class="font-mono text-blue-300 mb-1">{{ log.get('original_filename',
+                        <tr class="hover:bg-white hover:bg-opacity-5 transition-colors duration-150">
+                            <td class="py-4 px-6 text-sm text-gray-400 font-mono">{{ log.get('timestamp',
+                                'N/A')[:19].replace('T', ' ') }}</td>
+
+                            <td class="py-4 px-6">
+                                <p class="text-sm font-bold text-white mb-1">{{ log.get('original_filename',
                                     log.get('filename', 'Unknown')) }}</p>
-                                <p class="text-xs text-gray-400">{{ log.get('detected_mime', 'unknown') }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ log.get('detected_mime', 'unknown') }} •
+                                    {{ log.get('size', 0) }}B</p>
+                                <p class="text-[10px] text-gray-600 font-mono mt-1 opacity-50"
+                                    title="{{ log.get('sha256_hash', '') }}">{{ log.get('sha256_hash', 'N/A')[:16] }}...
+                                </p>
                             </td>
-                            <td class="py-3 px-4 text-xs font-mono text-gray-300">
-                                <p>Size: {{ log.get('size', 0) }}B</p>
-                                <p class="truncate w-32" title="{{ log.get('sha256_hash', '') }}">Hash: {{
-                                    log.get('sha256_hash', 'N/A')[:8] }}...</p>
-                            </td>
-                            <td class="py-3 px-4">
-                                <div class="mb-1">
+
+                            <td class="py-4 px-6">
+                                <div class="mb-2">
                                     {% if log.get('is_safe', True) %}
                                     <span
-                                        class="px-2 py-1 bg-green-900 text-green-300 rounded text-xs font-bold shadow">SAFE</span>
+                                        class="px-3 py-1 bg-safe bg-opacity-10 text-safe border border-safe border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(0,230,118,0.2)]">SAFE</span>
                                     {% else %}
                                     <span
-                                        class="px-2 py-1 bg-red-900 text-red-300 rounded text-xs font-bold shadow">BLOCKED
-                                        ({{ log.get('risk_score', 0.0) }})</span>
+                                        class="px-3 py-1 bg-danger bg-opacity-10 text-danger border border-danger border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(255,42,95,0.2)]">
+                                        BLOCKED ({{ "%.2f"|format(log.get('risk_score', 0.0)) }})
+                                    </span>
                                     {% endif %}
                                 </div>
-                                <p class="text-xs text-gray-400">Entropy: {{ "%.2f"|format(log.get('entropy', 0.0)) }}
-                                </p>
+                                <div class="text-[10px] text-gray-500 font-mono mt-2 space-y-0.5">
+                                    <p>Heuristic Entropy: <span class="text-gray-300">{{
+                                            "%.2f"|format(log.get('entropy', 0.0)) }}</span></p>
 
-                                {% if log.get('ai_telemetry') %}
-                                <div
-                                    class="mt-2 bg-gray-900 border border-blue-900 rounded p-1 text-[10px] text-blue-300">
-                                    <p title="PyTorch Output">ByteCNN: {{
-                                        "%.2f"|format(log.ai_telemetry.get('cnn_score', 0)) }}</p>
-                                    <p title="Sci-Kit Output">Anomaly: {{
-                                        "%.2f"|format(log.ai_telemetry.get('anomaly_score', 0)) }}</p>
+                                    {% if log.get('ai_telemetry') %}
+                                    <p title="PyTorch Output">Net.ByteCNN: <span class="text-brand text-glow">{{
+                                            "%.3f"|format(log.ai_telemetry.get('cnn_score', 0)) }}</span></p>
+                                    <p title="Sci-Kit Output">Net.Anomaly: <span class="text-brand text-glow">{{
+                                            "%.3f"|format(log.ai_telemetry.get('anomaly_score', 0)) }}</span></p>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
                             </td>
-                            <td class="py-3 px-4 text-xs text-gray-400 max-w-xs">
-                                {% for reason in log.get('reasons', []) %}
-                                <p class="mb-1">- {{ reason }}</p>
-                                {% else %}
-                                <p class="italic text-gray-500">No anomalies detected.</p>
-                                {% endfor %}
+
+                            <td class="py-4 px-6">
+                                <div class="text-xs space-y-1">
+                                    {% for reason in log.get('reasons', []) %}
+                                    <p class="text-gray-400"><span class="text-brand mr-1">►</span> {{ reason }}</p>
+                                    {% else %}
+                                    <p class="text-gray-600 font-mono uppercase tracking-widest opacity-50">Payload
+                                        pristine</p>
+                                    {% endfor %}
+                                </div>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5" class="py-6 text-center text-gray-500 italic">No logs found for this user.
+                            <td colspan="4" class="py-12 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-mono tracking-widest uppercase text-sm">Subject database empty.</p>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -139,7 +285,7 @@
         </div>
     </div>
 
-    <!-- Frontend Script for LLM Generator Trigger -->
+    <!-- Frontend Script for LLM Generator Trigger & Charting -->
     <script>
         const userId = "{{ user_id }}";
 
@@ -148,26 +294,50 @@
             const ctx = document.getElementById('riskChart').getContext('2d');
             const labels = [];
             const dataPoints = [];
+            const bgColors = [];
+            const borderColors = [];
 
             // Jinja safely injects chronological data
             {% for log in logs | reverse %}
             labels.push("{{ log.get('timestamp', '')[11:16] }}");
-            dataPoints.push({{ log.get('risk_score', 0) }});
+            const score = {{ log.get('risk_score', 0)
+        }};
+        dataPoints.push(score);
+
+        if (score > 0.7) {
+            borderColors.push('#ff2a5f');
+            bgColors.push('rgba(255, 42, 95, 0.5)');
+        } else if (score > 0.4) {
+            borderColors.push('#ffc400');
+            bgColors.push('rgba(255, 196, 0, 0.5)');
+        } else {
+            borderColors.push('#00e676');
+            bgColors.push('rgba(0, 230, 118, 0.5)');
+        }
         {% endfor %}
+
+        // Base glow effect for chart line
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
+        gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
 
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Total Assessed Risk Score',
+                    label: 'Threat Horizon Context',
                     data: dataPoints,
-                    borderColor: 'rgba(59, 130, 246, 1)', // Tailwind Blue 500
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#00f0ff',
+                    backgroundColor: gradient,
                     borderWidth: 2,
-                    tension: 0.4,
+                    tension: 0.3,
                     fill: true,
-                    pointBackgroundColor: 'rgba(239, 68, 68, 1)', // Tailwind Red 500 for points
+                    pointBackgroundColor: borderColors,
+                    pointBorderColor: '#1a1d24',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                 }]
             },
             options: {
@@ -177,16 +347,31 @@
                     y: {
                         min: 0,
                         max: 1.0,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        ticks: { color: 'rgba(156, 163, 175, 1)' }
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: {
+                            color: 'rgba(156, 163, 175, 0.7)',
+                            font: { family: "'JetBrains Mono', monospace", size: 10 }
+                        }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: 'rgba(156, 163, 175, 1)' }
+                        ticks: {
+                            color: 'rgba(156, 163, 175, 0.7)',
+                            font: { family: "'JetBrains Mono', monospace", size: 10 }
+                        }
                     }
                 },
                 plugins: {
-                    legend: { labels: { color: '#fff' } }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 17, 21, 0.9)',
+                        titleFont: { family: "'JetBrains Mono', monospace", size: 12 },
+                        bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+                        padding: 12,
+                        borderColor: '#00f0ff',
+                        borderWidth: 1,
+                        displayColors: false
+                    }
                 }
             }
         });
@@ -198,13 +383,13 @@
             const content = document.getElementById('reportContent');
 
             btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
             container.classList.remove('hidden');
 
             content.innerHTML = `
-                <div class="flex items-center text-gray-400 italic">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Executing LLM Agent analysis on user logs...
+                <div class="flex items-center text-brand font-mono uppercase tracking-widest text-sm py-4">
+                    <svg class="animate-spin -ml-1 mr-4 h-5 w-5 text-brand" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Initializing LLM Security Subroutines...
                 </div>
             `;
 
@@ -215,15 +400,16 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
+                    // Inject and parse Markdown to styled HTML
                     content.innerHTML = marked.parse(data.report);
                 } else {
-                    content.innerHTML = `<p class="text-red-400 font-bold border-l-4 border-red-500 p-4 bg-red-900 bg-opacity-20">Error generating report: ${data.message}</p>`;
+                    content.innerHTML = `<p class="text-danger font-mono border-l-2 border-danger pl-4 text-sm mt-2">SYS_ERR: ${data.message}</p>`;
                 }
             } catch (err) {
-                content.innerHTML = `<p class="text-red-400 font-bold border-l-4 border-red-500 p-4 bg-red-900 bg-opacity-20">Network connection failed.</p>`;
+                content.innerHTML = `<p class="text-danger font-mono border-l-2 border-danger pl-4 text-sm mt-2">FATAL: Network uplink disconnected.</p>`;
             } finally {
                 btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
             }
         }
 

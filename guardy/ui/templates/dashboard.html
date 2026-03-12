@@ -4,79 +4,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guard-D Security Dashboard</title>
+    <title>Guardy Security Operations</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: '#0f1115',
+                        glass: 'rgba(255, 255, 255, 0.03)',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                        brand: '#00f0ff',
+                        danger: '#ff2a5f',
+                        safe: '#00e676',
+                        warning: '#ffc400'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at 50% 0%, #1a1d24 0%, #0f1115 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(20, 24, 32, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.1);
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .danger-glow {
+            text-shadow: 0 0 20px rgba(255, 42, 95, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.5);
+        }
+    </style>
 </head>
 
-<body class="bg-gray-900 text-white p-8 font-sans">
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold text-blue-400 mb-6">File Security Dashboard</h1>
+<body class="text-white p-4 md:p-8">
+    <div class="max-w-7xl mx-auto animate-fade-in">
+
+        <header class="mb-12 flex items-center justify-between border-b border-glassBorder pb-6">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-blue-500">Guardy</span>
+                    Operations
+                </h1>
+                <p class="text-gray-400 font-light text-lg tracking-wide">AI-Powered Cyber Threat Intelligence</p>
+            </div>
+            <div class="hidden md:flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-brand animate-pulse shadow-[0_0_10px_#00f0ff]"></div>
+                <span class="text-brand font-mono text-sm tracking-widest uppercase">System Online</span>
+            </div>
+        </header>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-blue-500">
-                <p class="text-gray-400 text-sm">Total Uploads</p>
-                <p class="text-3xl font-bold">{{ stats.get('total_uploads', 0) }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-slide-up"
+            style="animation-delay: 0.1s; animation-fill-mode: both;">
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-blue-500 opacity-10 rounded-full blur-2xl -mr-10 -mt-10 transition duration-500 group-hover:bg-brand group-hover:opacity-20">
+                </div>
+                <p class="text-gray-400 text-sm tracking-wider uppercase mb-1">Total Inspected</p>
+                <p class="text-4xl font-bold font-mono">{{ stats.get('total_uploads', 0) }}</p>
             </div>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-green-500">
-                <p class="text-gray-400 text-sm">Safe Files</p>
-                <p class="text-3xl font-bold text-green-400">{{ stats.get('safe_uploads', 0) }}</p>
+
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-safe opacity-10 rounded-full blur-2xl -mr-10 -mt-10 transition duration-500 group-hover:opacity-30">
+                </div>
+                <p class="text-gray-400 text-sm tracking-wider uppercase mb-1">Clean Files</p>
+                <p class="text-4xl font-bold font-mono text-safe">{{ stats.get('safe_uploads', 0) }}</p>
             </div>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-red-500">
-                <p class="text-gray-400 text-sm">Blocked Files</p>
-                <p class="text-3xl font-bold text-red-500">{{ stats.get('blocked_uploads', 0) }}</p>
+
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-danger opacity-10 rounded-full blur-2xl -mr-10 -mt-10 transition duration-500 group-hover:opacity-30">
+                </div>
+                <p class="text-gray-400 text-sm tracking-wider uppercase mb-1">Threats Blocked</p>
+                <p class="text-4xl font-bold font-mono text-danger danger-glow">{{ stats.get('blocked_uploads', 0) }}
+                </p>
             </div>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-yellow-500">
-                <p class="text-gray-400 text-sm">Quarantined</p>
-                <p class="text-3xl font-bold text-yellow-400">{{ stats.get('quarantined', 0) }}</p>
+
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-warning opacity-10 rounded-full blur-2xl -mr-10 -mt-10 transition duration-500 group-hover:opacity-30">
+                </div>
+                <p class="text-gray-400 text-sm tracking-wider uppercase mb-1">In Quarantine</p>
+                <p class="text-4xl font-bold font-mono text-warning">{{ stats.get('quarantined', 0) }}</p>
             </div>
         </div>
 
         <!-- Recent Alerts -->
-        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Recent Security Alerts</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="text-gray-400 border-b border-gray-700">
-                            <th class="py-3 px-4">Time</th>
-                            <th class="py-3 px-4">File Name</th>
-                            <th class="py-3 px-4">User ID</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4">Reason</th>
-                            <th class="py-3 px-4">Risk Score</th>
+        <div class="glass-panel rounded-2xl p-6 md:p-8 animate-slide-up border border-glassBorder"
+            style="animation-delay: 0.2s; animation-fill-mode: both;">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold tracking-wide flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                    Recent Anomaly Alerts
+                </h2>
+                <span
+                    class="px-3 py-1 bg-danger bg-opacity-20 text-danger border border-danger border-opacity-30 rounded-full text-xs font-bold tracking-widest uppercase animate-pulse">Live</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-glassBorder">
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead class="bg-black bg-opacity-40">
+                        <tr class="text-xs tracking-widest uppercase text-gray-400 border-b border-glassBorder">
+                            <th class="py-4 px-6">Timestamp</th>
+                            <th class="py-4 px-6">Payload Sig</th>
+                            <th class="py-4 px-6">Subject ID</th>
+                            <th class="py-4 px-6">Status</th>
+                            <th class="py-4 px-6">AI Telemetry</th>
+                            <th class="py-4 px-6">Risk Factor</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-glassBorder">
                         {% for alert in alerts %}
-                        <tr class="border-b border-gray-700 hover:bg-gray-750">
-                            <td class="py-3 px-4 text-sm">{{ alert.get('timestamp', 'N/A') }}</td>
-                            <td class="py-3 px-4 text-sm font-mono text-blue-300">{{ alert.get('original_filename',
-                                alert.get('filename', 'Unknown')) }}</td>
-                            <td class="py-3 px-4 text-sm">
-                                <a href="/security-dashboard/user/{{ alert.get('user_id', 'Anon') }}"
-                                    class="text-blue-400 hover:text-blue-300 underline font-semibold">{{
-                                    alert.get('user_id', 'Anon') }}</a>
+                        <tr class="hover:bg-white hover:bg-opacity-5 transition-colors duration-150">
+                            <td class="py-4 px-6 text-sm text-gray-300 font-mono">{{ alert.get('timestamp',
+                                'N/A')[:19].replace('T', ' ') }}</td>
+
+                            <td class="py-4 px-6">
+                                <p class="text-sm font-bold text-white mb-1">{{ alert.get('original_filename',
+                                    alert.get('filename', 'Unknown')) }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ alert.get('detected_mime', 'unknown') }}
+                                </p>
                             </td>
-                            <td class="py-3 px-4">
+
+                            <td class="py-4 px-6">
+                                <a href="/security-dashboard/user/{{ alert.get('user_id', 'Anon') }}"
+                                    class="inline-flex items-center px-3 py-1 bg-brand bg-opacity-10 text-brand rounded hover:bg-opacity-20 transition border border-brand border-opacity-20 font-mono text-sm">
+                                    {{ alert.get('user_id', 'Anon') }}
+                                    <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                        </path>
+                                    </svg>
+                                </a>
+                            </td>
+
+                            <td class="py-4 px-6">
                                 {% if alert.get('is_safe', True) %}
-                                <span class="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">SAFE</span>
+                                <div class="flex items-center text-safe text-xs font-bold tracking-widest">
+                                    <div class="w-2 h-2 rounded-full bg-safe mr-2"></div> SAFE
+                                </div>
                                 {% else %}
-                                <span class="px-2 py-1 bg-red-900 text-red-300 rounded text-xs">BLOCKED</span>
+                                <div class="flex items-center text-danger text-xs font-bold tracking-widest">
+                                    <div class="w-2 h-2 rounded-full bg-danger mr-2 shadow-[0_0_8px_#ff2a5f]"></div>
+                                    BLOCKED
+                                </div>
                                 {% endif %}
                             </td>
-                            <td class="py-3 px-4 text-sm text-gray-400">
-                                {% for reason in alert.get('reasons', []) %}
-                                <p>- {{ reason }}</p>
-                                {% endfor %}
+
+                            <td class="py-4 px-6">
+                                <div class="text-xs text-gray-400 space-y-1">
+                                    {% for reason in alert.get('reasons', [])[:2] %}
+                                    <p class="truncate w-48" title="{{ reason }}"><span
+                                            class="text-danger opacity-70">►</span> {{ reason }}</p>
+                                    {% endfor %}
+                                    {% if alert.get('reasons', [])|length > 2 %}
+                                    <p class="text-gray-600 italic">+{{ alert.get('reasons', [])|length - 2 }} more
+                                        flags</p>
+                                    {% endif %}
+                                </div>
                             </td>
-                            <td class="py-3 px-4 text-sm">
-                                {{ alert.get('risk_score', 0.0) }}
+
+                            <td class="py-4 px-6">
+                                <div class="flex items-center">
+                                    <div class="w-16 h-1.5 bg-gray-800 rounded-full mr-3 overflow-hidden">
+                                        {% set score = alert.get('risk_score', 0.0) %}
+                                        {% set pct = (score * 100) | round | int %}
+                                        <div class="h-full {% if score > 0.7 %}bg-danger{% elif score > 0.4 %}bg-warning{% else %}bg-safe{% endif %}"
+                                            style="width: {{ pct }}%"></div>
+                                    </div>
+                                    <span
+                                        class="font-mono text-sm {% if score > 0.7 %}text-danger{% elif score > 0.4 %}text-warning{% else %}text-safe{% endif %}">
+                                        {{ "%.2f"|format(score) }}
+                                    </span>
+                                </div>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="py-6 text-center text-gray-500 italic">No recent alerts recorded.
+                            <td colspan="6" class="py-12 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-mono tracking-widest uppercase text-sm">Target sector secure. No
+                                        active anomalies.</p>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}

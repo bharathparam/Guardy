@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardy - Secure File Validation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="landing-view">
+        <nav class="navbar">
+            <div class="nav-left">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    Guardy
+                </div>
+            </div>
+            <div class="nav-center">
+                <a href="#" id="nav-link-home">Home</a>
+                <a href="#" id="nav-link-features">Features</a>
+                <a href="#" id="nav-link-docs">Docs</a>
+                <a href="#" id="nav-link-dashboard">Dashboard</a>
+            </div>
+            <div class="nav-right">
+                <a href="#" class="login-btn" id="nav-link-login">Login</a>
+                <a href="#" class="signup-btn" id="nav-link-signup">Sign Up</a>
+            </div>
+        </nav>
+        <main class="landing-main">
+            <section class="hero-section">
+                <div class="hero-content">
+                    <div class="badge">Enterprise Grade file validation</div>
+                    <h1>Secure File Storage<br>& AI Detection</h1>
+                    <p>Intercept attacks before they hit the disk. Guardy validates MIME types, checks
+                        cryptography, isolates threats via Scikit-Learn IsolationForest, and quarantines malicious
+                        uploads natively.</p>
+                    <div class="hero-actions">
+                        <input type="file" id="fileUpload" style="display: none;">
+                        <button class="btn-primary upload-btn" onclick="document.getElementById('fileUpload').click()">
+                            Upload File & Test Security
+                        </button>
+                    </div>
+                    <div class="upload-status" id="uploadStatus"></div>
+                </div>
+                <div class="hero-graphic">
+                    <img src="/static/Secure data-bro.svg" alt="Security Illustration">
+                </div>
+            </section>
+            <section id="features" class="features-split">
+                <div class="features-text">
+                    <h2>Why use Guardy?</h2>
+                    <p>We built this library so backend developers no longer have to rely solely on HTTP headers or file
+                        extensions.</p>
+                    <ul class="feature-list">
+                        <li>
+                            <strong>Request Interceptor</strong>
+                            <span>Validates constraints instantaneously to reject massive payloads.</span>
+                        </li>
+                        <li>
+                            <strong>Deep MIME Analysis</strong>
+                            <span>Checks file bits instead of trusting the user's extension.</span>
+                        </li>
+                        <li>
+                            <strong>AI Anomaly Isolation</strong>
+                            <span>Maps behavior using ML models like scikit-learn.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="features-code" id="install">
+                    <div class="terminal-mock">
+                        <div class="terminal-header">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="terminal-body">
+                            <button class="copy-btn" onclick="copyCode()">Copy</button>
+                            <pre id="codeBlock"><code>
+<span class="comment"># Install library</span>
+<span class="prompt">$</span> pip install guardy
+
+<span class="comment"># Import library</span>
+<span class="keyword">from</span> guardy <span class="keyword">import</span> FileAnalyzer
+
+<span class="decorator">@app.post</span>(<span class="string">"/upload"</span>)
+<span class="keyword">async def</span> upload(file: UploadFile):
+    assessment = analyzer.analyze_file(
+        file_bytes=<span class="keyword">await</span> file.read(),
+        filename=file.filename
+    )
+    <span class="keyword">return</span> assessment
+
+<span class="comment"># Result</span>
+<span class="prompt">✔</span> MIME verified
+<span class="prompt">✔</span> Signature validated
+<span class="prompt">✔</span> AI anomaly check
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- DOCS VIEW -->
+    <div id="docs-view" style="display: none; min-height: 100vh; background: #ffffff;">
+        <nav class="navbar" style="border-bottom: 1px solid #e5e7eb;">
+            <div class="nav-left">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    Guardy Docs
+                </div>
+            </div>
+            <div class="nav-right">
+                <button class="btn-secondary" id="back-from-docs">Back to Home</button>
+            </div>
+        </nav>
+        <div style="max-width: 900px; margin: 60px auto; padding: 0 40px;">
+            <h1 style="font-size: 3rem; margin-bottom: 20px; color: #0f172a;">Documentation</h1>
+            <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 40px;">Welcome to the official Guardy
+                developer documentation. Learn how to integrate deep payload analysis into your backend.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px;">
+                <div style="border: 1px solid #e2e8f0; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <h3 style="margin-bottom: 15px; color: #1e293b;">Quick Start</h3>
+                    <p style="color: #64748b; margin-bottom: 20px; line-height: 1.6;">Get up and running in less than 5
+                        minutes with our Python SDK.</p>
+                    <a href="#" style="color: #3b82f6; font-weight: 600; text-decoration: none;">View Guide →</a>
+                </div>
+                <div style="border: 1px solid #e2e8f0; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <h3 style="margin-bottom: 15px; color: #1e293b;">API Reference</h3>
+                    <p style="color: #64748b; margin-bottom: 20px; line-height: 1.6;">Comprehensive list of all
+                        endpoints, parameters, and response objects.</p>
+                    <a href="#" style="color: #3b82f6; font-weight: 600; text-decoration: none;">View API Docs →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" style="display: none;">
+        <div id="threejs-canvas"></div>
+        <div class="dashboard-container">
+            <aside class="sidebar">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    Guardy Dashboard
+                </div>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-item focus-landing" id="back-to-landing-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Back to Landing
+                    </a>
+                    <a href="#" class="nav-item active" id="nav-overview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Overview
+                    </a>
+                    <a href="#" class="nav-item" id="nav-pipeline">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                        Live Pipeline
+                    </a>
+                </nav>
+            </aside>
+            <main class="main-content">
+                <header class="top-header">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search files...">
+                    </div>
+                    <div class="header-actions">
+                        <input type="file" id="dashFileUpload" style="display: none;">
+                        <button class="btn-primary" onclick="document.getElementById('dashFileUpload').click()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 5px;">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Upload File
+                        </button>
+                    </div>
+                </header>
+                <div class="dashboard-scroll-area" id="overview-content">
+                    <div class="dashboard-grid blur-load" id="metrics-load">
+                        <div class="panel">
+                            <div class="panel-header"><h3>Upload Monitor</h3></div>
+                            <div class="panel-body">
+                                <div class="stat-row">
+                                    <span class="stat-label">Requests</span>
+                                    <span class="stat-value" id="val-requests">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Headers</span>
+                                    <span class="stat-value" id="val-headers">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Files</span>
+                                    <span class="stat-value" id="val-files">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header"><h3>Status</h3></div>
+                            <div class="panel-body">
+                                <div class="stat-row">
+                                    <span class="stat-label">Security Alerts</span>
+                                    <span class="stat-value text-red" id="val-alerts">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Flagged files</span>
+                                    <span class="stat-value text-orange" id="val-flagged">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Spoof attempts</span>
+                                    <span class="stat-value text-red" id="val-spoof">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Malware matches</span>
+                                    <span class="stat-value text-red" id="val-malware">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header"><h3>System Health</h3></div>
+                            <div class="panel-body">
+                                <div class="stat-row">
+                                    <span class="stat-label">Database latency</span>
+                                    <span class="stat-value" id="val-latency">0ms</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Storage usage</span>
+                                    <span class="stat-value" id="val-storage">0 MB</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Upload rate</span>
+                                    <span class="stat-value" id="val-rate">0/s</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Threat score</span>
+                                    <span class="stat-value text-green" id="val-threat">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="charts-container">
+                        <div class="chart-box blur-load">
+                            <div class="box-header"><h3>Upload Activity</h3></div>
+                            <div class="canvas-wrapper">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box side-chart blur-load">
+                            <div class="box-header"><h3>File Analysis Overview</h3></div>
+                            <div class="canvas-wrapper pie-wrapper">
+                                <canvas id="typeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box blur-load">
+                            <div class="box-header"><h3>Security Layer Execution</h3></div>
+                            <div class="canvas-wrapper">
+                                <canvas id="layerChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box blur-load">
+                            <div class="box-header"><h3>System Performance</h3></div>
+                            <div class="canvas-wrapper">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container blur-load">
+                        <div class="box-header"><h3>Recent Security Events</h3></div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>File</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logs-container"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-scroll-area" id="pipeline-content" style="display: none;">
+                    <div class="pipeline-layout">
+                        <div class="pipeline-file-list">
+                            <div class="box-header"><h3>Recent Files</h3></div>
+                            <div id="pipeline-files-container">
+                                <p style="color:var(--text-secondary); font-size:0.9rem; text-align:center;">No files yet</p>
+                            </div>
+                        </div>
+                        <div class="pipeline-visualizer">
+                            <div class="box-header">
+                                <div>
+                                    <h3 style="font-size:1.5rem;margin-bottom:0.5rem;">Real-Time File Security Pipeline</h3>
+                                    <p style="color: var(--text-secondary); margin-bottom: 0;">Watch how Guardy processes incoming payloads through 8 layers of defense in real-time.</p>
+                                </div>
+                                <div style="display: flex; gap: 15px;">
+                                    <button id="run-pipeline-btn" class="btn-primary" disabled>Run Visualizer</button>
+                                    <button id="report-pipeline-btn" class="btn-secondary" disabled>Generate Report</button>
+                                </div>
+                            </div>
+                            <div class="pipeline-board">
+                                <div class="pipeline-track" id="p-track"></div>
+                                <div class="pipeline-packet" id="anim-packet" style="opacity: 0;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                        <polyline points="13 2 13 9 20 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="nodes-grid">
+                                    <div class="p-node" id="pn-1"><div class="p-node-ring"></div><div class="p-node-label">1. Interceptor</div></div>
+                                    <div class="p-node" id="pn-2"><div class="p-node-ring"></div><div class="p-node-label">2. Ext Check</div></div>
+                                    <div class="p-node" id="pn-3"><div class="p-node-ring"></div><div class="p-node-label">3. MIME Anal</div></div>
+                                    <div class="p-node" id="pn-4"><div class="p-node-ring"></div><div class="p-node-label">4. Sig Ver</div></div>
+                                    <div class="p-node" id="pn-5"><div class="p-node-ring"></div><div class="p-node-label">5. Hash</div></div>
+                                    <div class="p-node" id="pn-6"><div class="p-node-ring"></div><div class="p-node-label">6. AI Anomaly</div></div>
+                                    <div class="p-node" id="pn-7"><div class="p-node-ring"></div><div class="p-node-label">7. Storage</div></div>
+                                    <div class="p-node" id="pn-8"><div class="p-node-ring"></div><div class="p-node-label">8. SOC Log</div></div>
+                                </div>
+                                <div class="sim-terminal">
+                                    <div class="terminal-header">
+                                        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                                        <span style="margin-left: 10px; font-size:0.8rem; color:#94a3b8" id="term-title">System Logs</span>
+                                    </div>
+                                    <div class="terminal-body" id="sim-term-output">
+                                        <p><span style="color:#22c55e">$</span> Guardy SOC console ready...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <div class="modal-overlay" id="report-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Security Layer Report</h2>
+                    <span class="close-btn" id="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="file-summary">
+                        <p><strong>File:</strong> <span id="modal-filename">-</span></p>
+                        <p><strong>Status:</strong> <span id="modal-status" class="status-badge">-</span></p>
+                    </div>
+                    <div class="cyber-layers">
+                        <div class="layer-item" id="layer-request_interceptor">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+                            <div class="layer-info"><h4>Request Interceptor</h4><p>Validates payload size and headers</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-extension_check">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path></svg></div>
+                            <div class="layer-info"><h4>Extension Check</h4><p>Verifies file extension validity</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-mime_analysis">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
+                            <div class="layer-info"><h4>MIME Analysis</h4><p>Deep content-type inspection</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-signature_verification">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div>
+                            <div class="layer-info"><h4>Signature Verification</h4><p>Validates file magic bytes</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-cryptographic_hash">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+                            <div class="layer-info"><h4>Cryptographic Hash</h4><p>Generates SHA-256 fingerprint</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-ai_anomaly_detection">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path><path d="M12 6v6l4 2"></path></svg></div>
+                            <div class="layer-info"><h4>AI Anomaly Detection</h4><p>ML-based threat analysis</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-secure_storage">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+                            <div class="layer-info"><h4>Secure Storage</h4><p>Encrypted file persistence</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                        <div class="layer-item" id="layer-soc_monitoring">
+                            <div class="layer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+                            <div class="layer-info"><h4>SOC Monitoring</h4><p>Security operations logging</p></div>
+                            <div class="layer-status">PENDING</div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="download-report-btn" style="margin-top: 2rem; width: 100%;">Download Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

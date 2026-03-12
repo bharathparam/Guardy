@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "guardy"
 version = "1.0.0"
-description = "Secure File Storage Middleware that acts statelessly on file byte streams."
+description = "Secure File Storage Middleware with integrated modern web dashboard for real-time security monitoring"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
@@ -16,6 +16,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Framework :: FastAPI",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
     "fastapi>=0.100.0",
@@ -27,15 +30,16 @@ dependencies = [
     "numpy>=1.24.0",
     "jinja2>=3.1.2",
     "torch>=2.0.0",
-    "tqdm>=4.65.0"
+    "tqdm>=4.65.0",
+    "aiofiles>=23.0.0"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/example/secure_file_guard"
 
 [tool.setuptools.packages.find]
-include = ["secure_file_guard", "secure_file_guard.*"]
+include = ["guardy", "guardy.*"]
 
 [tool.setuptools.package-data]
-"guardy.ui" = ["templates/*", "static/*"]
+"guardy.ui" = ["templates/*", "templates/**/*", "static/*", "static/**/*"]
 "guardy.models" = ["*.pth", "*.pt", "*.pkl"]
