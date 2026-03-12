@@ -41,10 +41,8 @@ ENCRYPTION_KEY = Fernet.generate_key()
 
 # Construct a custom configuration to showcase the library's flexibility
 custom_config = GuardConfig(
-    max_safe_entropy=7.8,           # Relaxed entropy requirement for general files
-    max_zip_compression_ratio=100.0, # Reject archive bombs expanding more than 100x
-    weight_mime_spoofing=0.2,       # Standard penalty for spoofed extensions
-    rejection_risk_threshold=0.60   # Relaxed threshold to reduce false-positives
+    max_safe_entropy=7.8,         # Standard strict entropy
+    rejection_risk_threshold=0.50 # Return strict threshold to actually block dummy payload threats
 )
 
 # Instantiate the Stateless analyzer from our library
