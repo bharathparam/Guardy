@@ -107,7 +107,9 @@ class FileAnalyzer:
         current_entropy = calculate_entropy(file_bytes)
         
         # High Entropy Check (Encrypted/Obfuscated Payload Heuristics)
-        if current_entropy > self.config.max_safe_entropy and detected_mime not in ["application/zip", "application/x-zip-compressed", "application/gzip"]:
+        # We exclude archives and native images since their compression inherently maximizes byte entropy.
+        is_exempt_mime = detected_mime in ["application/zip", "application/x-zip-compressed", "application/gzip"] or detected_mime.startswith("image/")
+        if current_entropy > self.config.max_safe_entropy and not is_exempt_mime:
             risk_score += self.config.weight_entropy_anomaly
             reasons.append(f"Entropy Anomaly: Highly obfuscated or encrypted payload detected (Entropy: {current_entropy:.2f})")
 
