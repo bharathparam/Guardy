@@ -344,6 +344,15 @@
             { id: 'decision', name: 'DECISION', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' }
         ];
 
+        const stageDetails = {
+            'upload': ['Establishing TLS connection...', 'Receiving multipart payload bytes...', 'Payload buffered into isolated memory arena.'],
+            'protocol': ['Intercepting HTTP POST Request...', 'Validating Content-Length limits restrictions.', 'Cross-referencing HTTP headers vs byte sequence.'],
+            'structure': ['Decompiling binary format tree...', 'Scanning for embedded nested objects...', 'Verifying compression ratios (Zip Bomb Defense).'],
+            'polyglot': ['Loading malicious signature database...', 'Scanning for hidden script tags (<?php, <script>).', 'Validating Hex Magic Bytes vs Extensions.'],
+            'ai': ['Passing raw tensor array to ByteCNN model...', 'Evaluating behavioral anomaly with IsolationForest...', 'Calculating composite PyTorch Risk Score.'],
+            'decision': ['Aggregating Threat Intelligence Data...', 'Generating SHA-256 evidence fingerprint.']
+        };
+
         function renderNodes() {
             if (!nodesContainer) return;
             nodesContainer.innerHTML = '';
@@ -352,7 +361,13 @@
             line.className = 'absolute top-[22px] left-8 right-8 h-1 bg-glassBorder z-0';
             nodesContainer.appendChild(line);
 
-            pipelineStages.forEach((stage) => {
+            // Add moving packet
+            const packet = document.createElement('div');
+            packet.id = 'anim-packet';
+            packet.className = 'absolute top-[18px] left-8 w-3 h-3 rounded-full bg-brand shadow-[0_0_10px_#00f0ff] z-20 opacity-0 transition-all duration-500 ease-in-out';
+            nodesContainer.appendChild(packet);
+
+            pipelineStages.forEach((stage, index) => {
                 const node = document.createElement('div');
                 node.className = 'flex flex-col items-center relative z-10 w-16';
                 node.innerHTML = `
@@ -375,6 +390,7 @@
             if (type === 'error') colorClass = 'text-danger';
             if (type === 'success') colorClass = 'text-safe';
             if (type === 'warning') colorClass = 'text-warning';
+            if (type === 'process') colorClass = 'text-gray-400';
 
             p.innerHTML = `<span class="text-gray-500 opacity-50">[${time}]</span> <span class="${colorClass}">${msg}</span>`;
             terminalOutput.appendChild(p);
@@ -402,72 +418,89 @@
             }
         }
 
+        function movePacket(index) {
+            const packet = document.getElementById('anim-packet');
+            if (packet) {
+                packet.style.opacity = '1';
+                // Calculate percentage across the flex-between container based on index
+                const pct = (index / (pipelineStages.length - 1)) * 100;
+                // Adjust slight pixel offset to stay centered on line
+                packet.style.left = `calc(${pct}% - 6px)`;
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         async function processFile(file) {
             if (!fileInput) return;
             fileNameDisplay.textContent = file.name;
             fileNameDisplay.classList.remove('hidden');
             terminalOutput.innerHTML = '';
-            logTerminal(`Initializing analysis for payload: ${file.name}`);
+            logTerminal(`Initializing deep analysis for payload: ${file.name}`);
 
             pipelineStages.forEach(stage => setNodeState(stage.id, 'idle'));
-            setNodeState('upload', 'active');
+            const packet = document.getElementById('anim-packet');
+            if (packet) packet.style.opacity = '0';
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('user_id', 'dashboard_live_test');
 
-            let currentIndex = 0;
+            // Start the background network request
+            const backendPromise = fetch('/upload', { method: 'POST', body: formData }).catch(err => null);
 
-            const visualProgression = setInterval(() => {
-                if (currentIndex > 0) {
-                    setNodeState(pipelineStages[currentIndex - 1].id, 'success');
+            // Execute local UI animation sequence
+            for (let i = 0; i < pipelineStages.length; i++) {
+                const stage = pipelineStages[i];
+                setNodeState(stage.id, 'active');
+                movePacket(i);
+                logTerminal(`>>> Starting Guardy Engine: [${stage.name}] <<<`, 'info');
+
+                // Simulate individual processes for this stage
+                const details = stageDetails[stage.id] || [];
+                for (const detail of details) {
+                    await sleep(400); // 400ms per process log
+                    logTerminal(`  ↳ ${detail}`, 'process');
                 }
-                if (currentIndex < pipelineStages.length - 1) {
-                    setNodeState(pipelineStages[currentIndex].id, 'active');
-                    logTerminal(`Executing layer: ${pipelineStages[currentIndex].name}...`);
-                    currentIndex++;
-                } else {
-                    clearInterval(visualProgression);
+
+                // If this is the last node, wait for the backend response to color everything
+                if (i === pipelineStages.length - 1) {
+                    break;
                 }
-            }, 600);
+
+                // Otherwise mark this node as success and move on
+                setNodeState(stage.id, 'success');
+                await sleep(200);
+            }
 
             try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
+                const response = await backendPromise;
+                if (!response) throw new Error("Connection failed");
                 const data = await response.json();
 
-                // Keep animation feeling natural
-                setTimeout(() => {
-                    clearInterval(visualProgression);
-
-                    for (let i = 0; i < pipelineStages.length - 1; i++) {
-                        setNodeState(pipelineStages[i].id, 'success');
+                if (response.status === 200 || data.status === "SUCCESS") {
+                    setNodeState('decision', 'success');
+                    logTerminal(`Payload verified. Status: SAFE`, 'success');
+                    logTerminal(`File mapped to safe volume: ${data.file_id || 'OK'}`, 'success');
+                } else {
+                    setNodeState('ai', 'error');
+                    setNodeState('decision', 'error');
+                    if (packet) {
+                        packet.classList.replace('bg-brand', 'bg-danger');
+                        packet.classList.replace('shadow-[0_0_10px_#00f0ff]', 'shadow-[0_0_10px_#ff2a5f]');
                     }
-
-                    if (response.status === 200 || data.status === "SUCCESS") {
-                        setNodeState('decision', 'success');
-                        logTerminal(`Payload verified. Status: SAFE`, 'success');
-                        logTerminal(`File mapped to safe volume: ${data.file_id || 'OK'}`, 'success');
-                        setTimeout(() => window.location.reload(), 2500);
-                    } else {
-                        // Mark AI or Polyglot as failed generally
-                        setNodeState('ai', 'error');
-                        setNodeState('decision', 'error');
-                        logTerminal(`THREAT DETECTED`, 'error');
-                        if (data.reasons && data.reasons.length > 0) {
-                            data.reasons.forEach(r => logTerminal(`Reason: ${r}`, 'warning'));
-                        }
-                        logTerminal(`Action: QUARANTINED`, 'error');
-                        setTimeout(() => window.location.reload(), 5000);
+                    logTerminal(`THREAT DETECTED`, 'error');
+                    if (data.reasons && data.reasons.length > 0) {
+                        data.reasons.forEach(r => logTerminal(`Reason: ${r}`, 'warning'));
                     }
+                    logTerminal(`Action: QUARANTINED`, 'error');
+                }
 
-                }, Math.max(0, pipelineStages.length * 600 - 600));
+                setTimeout(() => window.location.reload(), 3000);
 
             } catch (err) {
-                clearInterval(visualProgression);
                 setNodeState('decision', 'error');
                 logTerminal(`CRITICAL: Server connection lost.`, 'error');
             }
@@ -475,21 +508,17 @@
 
         if (fileInput && dropZone) {
             fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    processFile(e.target.files[0]);
-                }
+                if (e.target.files.length > 0) processFile(e.target.files[0]);
             });
 
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('border-brand', 'bg-opacity-30');
             });
-
             dropZone.addEventListener('dragleave', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('border-brand', 'bg-opacity-30');
             });
-
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('border-brand', 'bg-opacity-30');
