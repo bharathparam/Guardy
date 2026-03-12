@@ -42,6 +42,8 @@ ENCRYPTION_KEY = Fernet.generate_key()
 # Construct a custom configuration to showcase the library's flexibility
 custom_config = GuardConfig(
     max_safe_entropy=7.8,         # Standard strict entropy
+    weight_mime_spoofing=0.5,     # Aggressively block extension spoofing for easy testing
+    max_ai_anomaly_score=0.5,     # Catch even minor AI behavioral deviations
     rejection_risk_threshold=0.50 # Return strict threshold to actually block dummy payload threats
 )
 
