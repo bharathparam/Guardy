@@ -341,96 +341,99 @@
         </div>
     </div>
 
+    <!-- Server data injection as JSON (safe Jinja → JS handoff) -->
+    <script id="server-data" type="application/json">
+    {
+        "userId": "{{ user_id }}",
+        "logs": [
+            {% for log in logs | reverse %}
+            {
+                "time": "{{ log.get('timestamp', '')[11:16] }}",
+                "risk": {{ log.get('risk_score', 0) }},
+                "safe": {{ 'true' if log.get('is_safe', True) else 'false' }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }
+    </script>
+
     <!-- Frontend Script for LLM Generator Trigger & Charting -->
     <script>
-        const userId = "{{ user_id }}";
+        // Safely parse server-side data from embedded JSON tag
+        const serverData = JSON.parse(document.getElementById('server-data').textContent);
+        const userId = serverData.userId;
+        const logsData = serverData.logs;
 
-        // Generate the ChartJS Line Chart
+        // Build ChartJS Data Arrays
+        const labels = logsData.map(l => l.time);
+        const dataPoints = logsData.map(l => l.risk);
+        const borderColors = logsData.map(l => l.risk > 0.7 ? '#ff2a5f' : l.risk > 0.4 ? '#ffc400' : '#00e676');
+        const bgColors = logsData.map(l => l.risk > 0.7 ? 'rgba(255, 42, 95, 0.5)' : l.risk > 0.4 ? 'rgba(255, 196, 0, 0.5)' : 'rgba(0, 230, 118, 0.5)');
+
+        // Render the Chart after DOM is ready
         document.addEventListener("DOMContentLoaded", function () {
-            const ctx = document.getElementById('riskChart').getContext('2d');
-            const labels = [];
-            const dataPoints = [];
-            const bgColors = [];
-            const borderColors = [];
+            const riskEl = document.getElementById('riskChart');
+            if (!riskEl) return;
+            const ctx = riskEl.getContext('2d');
 
-            // Jinja safely injects chronological data
-            {% for log in logs | reverse %}
-            labels.push("{{ log.get('timestamp', '')[11:16] }}");
-            const score = {{ log.get('risk_score', 0)
-        }};
-        dataPoints.push(score);
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
 
-        if (score > 0.7) {
-            borderColors.push('#ff2a5f');
-            bgColors.push('rgba(255, 42, 95, 0.5)');
-        } else if (score > 0.4) {
-            borderColors.push('#ffc400');
-            bgColors.push('rgba(255, 196, 0, 0.5)');
-        } else {
-            borderColors.push('#00e676');
-            bgColors.push('rgba(0, 230, 118, 0.5)');
-        }
-        {% endfor %}
-
-        // Base glow effect for chart line
-        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
-        gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Threat Horizon Context',
-                    data: dataPoints,
-                    borderColor: '#00f0ff',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true,
-                    pointBackgroundColor: borderColors,
-                    pointBorderColor: '#1a1d24',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        min: 0,
-                        max: 1.0,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: {
-                            color: 'rgba(156, 163, 175, 0.7)',
-                            font: { family: "'JetBrains Mono', monospace", size: 10 }
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Threat Horizon Context',
+                        data: dataPoints,
+                        borderColor: '#00f0ff',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: borderColors,
+                        pointBorderColor: '#1a1d24',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 1.0,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: 'rgba(156, 163, 175, 0.7)',
+                                font: { family: "'JetBrains Mono', monospace", size: 10 }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: 'rgba(156, 163, 175, 0.7)',
+                                font: { family: "'JetBrains Mono', monospace", size: 10 }
+                            }
                         }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            color: 'rgba(156, 163, 175, 0.7)',
-                            font: { family: "'JetBrains Mono', monospace", size: 10 }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 17, 21, 0.9)',
+                            titleFont: { family: "'JetBrains Mono', monospace", size: 12 },
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+                            padding: 12,
+                            borderColor: '#00f0ff',
+                            borderWidth: 1,
+                            displayColors: false
                         }
                     }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 17, 21, 0.9)',
-                        titleFont: { family: "'JetBrains Mono', monospace", size: 12 },
-                        bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
-                        padding: 12,
-                        borderColor: '#00f0ff',
-                        borderWidth: 1,
-                        displayColors: false
-                    }
                 }
-            }
-        });
+            });
         });
 
         async function generateReport() {
@@ -441,11 +444,12 @@
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
             container.classList.remove('hidden');
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             content.innerHTML = `
                 <div class="flex items-center text-brand font-mono uppercase tracking-widest text-sm py-4">
                     <svg class="animate-spin -ml-1 mr-4 h-5 w-5 text-brand" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Initializing LLM Security Subroutines...
+                    Compiling Guardy Security Intelligence Report...
                 </div>
             `;
 
@@ -456,13 +460,12 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    // Inject and parse Markdown to styled HTML
                     content.innerHTML = marked.parse(data.report);
                 } else {
                     content.innerHTML = `<p class="text-danger font-mono border-l-2 border-danger pl-4 text-sm mt-2">SYS_ERR: ${data.message}</p>`;
                 }
             } catch (err) {
-                content.innerHTML = `<p class="text-danger font-mono border-l-2 border-danger pl-4 text-sm mt-2">FATAL: Network uplink disconnected.</p>`;
+                content.innerHTML = `<p class="text-danger font-mono border-l-2 border-danger pl-4 text-sm mt-2">FATAL: Network uplink disconnected. ${err.message}</p>`;
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
